@@ -63,9 +63,13 @@ track the latest pulumi releases (Go SDK on `pulumi/sdk` v3.250.0; Node SDK on
 
 Unit tests cover command construction, shell quoting, size parsing, and response
 parsing. The full create → update → refresh → destroy lifecycle has been verified
-live against the exe.dev API (in-place tag/comment updates confirmed, refresh clean).
+live against the exe.dev API (in-place tag/comment updates confirmed, refresh clean),
+and a live create/destroy has been run through both the Go and TypeScript SDKs.
 Not yet live-exercised: `resize` (cpu/memory/disk) and replacement paths, though they
 use the same client machinery.
+
+> TypeScript 6 note: consuming programs may need `"ignoreDeprecations": "6.0"` in
+> `tsconfig.json` (the generated SDK uses node-style module resolution).
 
 ## License
 

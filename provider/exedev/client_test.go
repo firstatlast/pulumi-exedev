@@ -94,6 +94,18 @@ func TestParseDomains(t *testing.T) {
 	}
 }
 
+func TestBodyError(t *testing.T) {
+	if err := bodyError([]byte(`{"domain":"x","error":"DNS for x does not point to y"}`)); err == nil {
+		t.Error("expected error for 200-with-error body")
+	}
+	if err := bodyError([]byte(`{"vm_name":"ok","status":"running"}`)); err != nil {
+		t.Errorf("unexpected error for clean body: %v", err)
+	}
+	if err := bodyError([]byte(`{"error":""}`)); err != nil {
+		t.Errorf("empty error should be treated as success: %v", err)
+	}
+}
+
 func TestDomainID(t *testing.T) {
 	if got := domainID("vm1", "api.example.com"); got != "vm1/api.example.com" {
 		t.Errorf("domainID = %q", got)

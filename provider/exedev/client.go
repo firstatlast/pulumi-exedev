@@ -65,6 +65,34 @@ func (e *APIError) Error() string {
 	}
 }
 
+// isTransientConnect reports whether err is a "VM not reachable yet" failure —
+// share operations need the VM's SSH up, which lags behind status=running.
+func isTransientConnect(err error) bool {
+	var apiErr *APIError
+	if errors.As(err, &apiErr) && apiErr.Status == http.StatusUnprocessableEntity {
+		b := strings.ToLower(apiErr.Body)
+		return strings.Contains(b, "failed to connect") || strings.Contains(b, "handshake failed")
+	}
+	return false
+}
+
+// retryTransient retries fn while it fails with a transient connect error, up to
+// a deadline, so freshly-created VMs settle before share operations run.
+func retryTransient(ctx context.Context, fn func() error) error {
+	deadline := time.Now().Add(120 * time.Second)
+	for {
+		err := fn()
+		if err == nil || !isTransientConnect(err) || time.Now().After(deadline) {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return err
+		case <-time.After(4 * time.Second):
+		}
+	}
+}
+
 func (c *Client) Exec(ctx context.Context, command string) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpoint, bytes.NewBufferString(command))
 	if err != nil {
@@ -306,8 +334,12 @@ func (c *Client) DomainAdd(ctx context.Context, vm, hostname string, wildcard bo
 	cmd.literal(vm)
 	cmd.literal(hostname)
 	cmd.raw("--json")
-	_, err := c.Exec(ctx, cmd.String())
-	return err
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return err
+	}
+	// domain add reports "DNS does not point to ..." as HTTP 200 with an error body.
+	return bodyError(body)
 }
 
 func (c *Client) DomainRemove(ctx context.Context, vm, hostname string) error {
@@ -371,6 +403,36 @@ func (c *Client) ShareSetPublic(ctx context.Context, vm string, public bool) err
 	return err
 }
 
+// ShareReceiveEmail toggles inbound email for a VM (share receive-email <vm> on|off).
+func (c *Client) ShareReceiveEmail(ctx context.Context, vm string, on bool) error {
+	cmd := newCmd("share")
+	cmd.raw("receive-email")
+	cmd.literal(vm)
+	if on {
+		cmd.raw("on")
+	} else {
+		cmd.raw("off")
+	}
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
+// ShareAccess toggles team SSH/Shelley/web access (share access allow|disallow <vm>).
+func (c *Client) ShareAccess(ctx context.Context, vm string, allow bool) error {
+	cmd := newCmd("share")
+	cmd.raw("access")
+	if allow {
+		cmd.raw("allow")
+	} else {
+		cmd.raw("disallow")
+	}
+	cmd.literal(vm)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
 // cmd accumulates shell-quoted command tokens.
 type cmd struct{ parts []string }
 
@@ -394,6 +456,18 @@ func shellQuote(s string) string {
 		return s
 	}
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+}
+
+// bodyError surfaces soft failures exe.dev returns as HTTP 200 with an
+// {"error": "..."} field instead of a non-2xx status.
+func bodyError(body []byte) error {
+	var r struct {
+		Error string `json:"error"`
+	}
+	if json.Unmarshal(body, &r) == nil && r.Error != "" {
+		return fmt.Errorf("exe.dev: %s", r.Error)
+	}
+	return nil
 }
 
 // parseVM tolerates the shapes exe.dev may return: bare object, {"vm":..}, {"vms":[..]}.

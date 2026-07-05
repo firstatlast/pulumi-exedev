@@ -27,6 +27,8 @@ type VmArgs struct {
 	NoEmail      *bool             `pulumi:"noEmail,optional"`
 	Public       *bool             `pulumi:"public,optional"`
 	Port         *int              `pulumi:"port,optional"`
+	ReceiveEmail *bool             `pulumi:"receiveEmail,optional"`
+	TeamAccess   *bool             `pulumi:"teamAccess,optional"`
 }
 
 type VmState struct {
@@ -74,6 +76,8 @@ func (a *VmArgs) Annotate(an infer.Annotator) {
 	an.Describe(&a.NoEmail, "Suppress the creation email notification.")
 	an.Describe(&a.Public, "Make the HTTP proxy publicly accessible. Defaults to private.")
 	an.Describe(&a.Port, "Container port the HTTP proxy forwards to.")
+	an.Describe(&a.ReceiveEmail, "Enable inbound email delivery to the VM.")
+	an.Describe(&a.TeamAccess, "Allow team members SSH, Shelley, and web-proxy access to the VM.")
 }
 
 func (Vm) Check(ctx context.Context, req infer.CheckRequest) (infer.CheckResponse[VmArgs], error) {
@@ -130,13 +134,30 @@ func applyShare(ctx context.Context, client *Client, name string, old *VmArgs, i
 	if old != nil {
 		oldPort, oldPublic = old.Port, old.Public
 	}
+	var oldEmail, oldAccess *bool
+	if old != nil {
+		oldEmail, oldAccess = old.ReceiveEmail, old.TeamAccess
+	}
+
+	// Share ops connect to the VM over SSH, which lags status=running on a fresh
+	// create, so each is retried on a transient connect failure.
 	if in.Port != nil && !intEq(in.Port, oldPort) {
-		if err := client.SharePort(ctx, name, *in.Port); err != nil {
+		if err := retryTransient(ctx, func() error { return client.SharePort(ctx, name, *in.Port) }); err != nil {
 			return err
 		}
 	}
 	if in.Public != nil && (oldPublic == nil || *in.Public != *oldPublic) {
-		if err := client.ShareSetPublic(ctx, name, *in.Public); err != nil {
+		if err := retryTransient(ctx, func() error { return client.ShareSetPublic(ctx, name, *in.Public) }); err != nil {
+			return err
+		}
+	}
+	if in.ReceiveEmail != nil && (oldEmail == nil || *in.ReceiveEmail != *oldEmail) {
+		if err := retryTransient(ctx, func() error { return client.ShareReceiveEmail(ctx, name, *in.ReceiveEmail) }); err != nil {
+			return err
+		}
+	}
+	if in.TeamAccess != nil && (oldAccess == nil || *in.TeamAccess != *oldAccess) {
+		if err := retryTransient(ctx, func() error { return client.ShareAccess(ctx, name, *in.TeamAccess) }); err != nil {
 			return err
 		}
 	}
@@ -257,6 +278,8 @@ func (Vm) Diff(_ context.Context, req infer.DiffRequest[VmArgs, VmState]) (infer
 	update("tags", !setEq(in.Tags, old.Tags))
 	update("port", !intEq(in.Port, old.Port))
 	update("public", boolPtr(in.Public) != boolPtr(old.Public))
+	update("receiveEmail", boolPtr(in.ReceiveEmail) != boolPtr(old.ReceiveEmail))
+	update("teamAccess", boolPtr(in.TeamAccess) != boolPtr(old.TeamAccess))
 
 	// Disk grows in place; shrinking is not supported so it forces a replace.
 	if !strEq(in.Disk, old.Disk) {

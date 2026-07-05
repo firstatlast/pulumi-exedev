@@ -151,6 +151,105 @@
         "hostname"
       ]
     },
+    "exedev:index:Integration": {
+      "description": "An exe.dev integration. Currently models the http-proxy type, which injects auth/headers into requests from attached VMs to a target URL.",
+      "properties": {
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Where the integration is mounted: vm:\u003cname\u003e, tag:\u003cname\u003e, or auto:all."
+        },
+        "bearer": {
+          "type": "string",
+          "description": "Bearer token to inject (shorthand for an Authorization: Bearer header).",
+          "secret": true
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-form comment stored with the integration."
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Headers to inject, as name-\u003evalue.",
+          "secret": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Integration name (unique). Changing this replaces the integration."
+        },
+        "noAuth": {
+          "type": "boolean",
+          "description": "Create the http-proxy with no injected authentication."
+        },
+        "resolvedType": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string",
+          "description": "Target URL the http-proxy forwards to."
+        },
+        "type": {
+          "type": "string",
+          "description": "Integration type. Defaults to http-proxy. Changing this replaces the integration.",
+          "default": "http-proxy"
+        }
+      },
+      "required": [
+        "name",
+        "resolvedType"
+      ],
+      "inputProperties": {
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Where the integration is mounted: vm:\u003cname\u003e, tag:\u003cname\u003e, or auto:all."
+        },
+        "bearer": {
+          "type": "string",
+          "description": "Bearer token to inject (shorthand for an Authorization: Bearer header).",
+          "secret": true
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-form comment stored with the integration."
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Headers to inject, as name-\u003evalue.",
+          "secret": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Integration name (unique). Changing this replaces the integration."
+        },
+        "noAuth": {
+          "type": "boolean",
+          "description": "Create the http-proxy with no injected authentication."
+        },
+        "target": {
+          "type": "string",
+          "description": "Target URL the http-proxy forwards to."
+        },
+        "type": {
+          "type": "string",
+          "description": "Integration type. Defaults to http-proxy. Changing this replaces the integration.",
+          "default": "http-proxy"
+        }
+      },
+      "requiredInputs": [
+        "name"
+      ]
+    },
     "exedev:index:SshKey": {
       "description": "An SSH public key registered on your exe.dev account.",
       "properties": {

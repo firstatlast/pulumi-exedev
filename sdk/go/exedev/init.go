@@ -23,6 +23,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 	switch typ {
 	case "exedev:index:Domain":
 		r = &Domain{}
+	case "exedev:index:Integration":
+		r = &Integration{}
 	case "exedev:index:SshKey":
 		r = &SshKey{}
 	case "exedev:index:Vm":

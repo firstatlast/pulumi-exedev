@@ -15,6 +15,11 @@ export const getVm: typeof import("./getVm").getVm = null as any;
 export const getVmOutput: typeof import("./getVm").getVmOutput = null as any;
 utilities.lazyLoad(exports, ["getVm","getVmOutput"], () => require("./getVm"));
 
+export { IntegrationArgs } from "./integration";
+export type Integration = import("./integration").Integration;
+export const Integration: typeof import("./integration").Integration = null as any;
+utilities.lazyLoad(exports, ["Integration"], () => require("./integration"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
@@ -44,6 +49,8 @@ const _module = {
         switch (type) {
             case "exedev:index:Domain":
                 return new Domain(name, <any>undefined, { urn })
+            case "exedev:index:Integration":
+                return new Integration(name, <any>undefined, { urn })
             case "exedev:index:SshKey":
                 return new SshKey(name, <any>undefined, { urn })
             case "exedev:index:Vm":

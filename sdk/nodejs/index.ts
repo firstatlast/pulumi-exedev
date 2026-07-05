@@ -10,6 +10,11 @@ export type Domain = import("./domain").Domain;
 export const Domain: typeof import("./domain").Domain = null as any;
 utilities.lazyLoad(exports, ["Domain"], () => require("./domain"));
 
+export { GetVmArgs, GetVmResult, GetVmOutputArgs } from "./getVm";
+export const getVm: typeof import("./getVm").getVm = null as any;
+export const getVmOutput: typeof import("./getVm").getVmOutput = null as any;
+utilities.lazyLoad(exports, ["getVm","getVmOutput"], () => require("./getVm"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;

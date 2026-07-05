@@ -27,5 +27,8 @@ func NewProvider() (p.Provider, error) {
 			infer.Resource(&Vm{}),
 			infer.Resource(&Domain{}),
 		).
+		WithFunctions(
+			infer.Function(&GetVm{}),
+		).
 		Build()
 }

@@ -134,28 +134,30 @@ func applyShare(ctx context.Context, client *Client, name string, old *VmArgs, i
 	if old != nil {
 		oldPort, oldPublic = old.Port, old.Public
 	}
-	if in.Port != nil && !intEq(in.Port, oldPort) {
-		if err := client.SharePort(ctx, name, *in.Port); err != nil {
-			return err
-		}
-	}
-	if in.Public != nil && (oldPublic == nil || *in.Public != *oldPublic) {
-		if err := client.ShareSetPublic(ctx, name, *in.Public); err != nil {
-			return err
-		}
-	}
-
 	var oldEmail, oldAccess *bool
 	if old != nil {
 		oldEmail, oldAccess = old.ReceiveEmail, old.TeamAccess
 	}
+
+	// Share ops connect to the VM over SSH, which lags status=running on a fresh
+	// create, so each is retried on a transient connect failure.
+	if in.Port != nil && !intEq(in.Port, oldPort) {
+		if err := retryTransient(ctx, func() error { return client.SharePort(ctx, name, *in.Port) }); err != nil {
+			return err
+		}
+	}
+	if in.Public != nil && (oldPublic == nil || *in.Public != *oldPublic) {
+		if err := retryTransient(ctx, func() error { return client.ShareSetPublic(ctx, name, *in.Public) }); err != nil {
+			return err
+		}
+	}
 	if in.ReceiveEmail != nil && (oldEmail == nil || *in.ReceiveEmail != *oldEmail) {
-		if err := client.ShareReceiveEmail(ctx, name, *in.ReceiveEmail); err != nil {
+		if err := retryTransient(ctx, func() error { return client.ShareReceiveEmail(ctx, name, *in.ReceiveEmail) }); err != nil {
 			return err
 		}
 	}
 	if in.TeamAccess != nil && (oldAccess == nil || *in.TeamAccess != *oldAccess) {
-		if err := client.ShareAccess(ctx, name, *in.TeamAccess); err != nil {
+		if err := retryTransient(ctx, func() error { return client.ShareAccess(ctx, name, *in.TeamAccess) }); err != nil {
 			return err
 		}
 	}

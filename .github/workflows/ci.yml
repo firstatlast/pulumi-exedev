@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: "1.26"
+          cache-dependency-path: provider/go.sum
+
+      - name: Vet and test
+        working-directory: provider
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: Install Pulumi CLI
+        run: |
+          curl -fsSL https://get.pulumi.com | sh
+          echo "$HOME/.pulumi/bin" >> "$GITHUB_PATH"
+
+      - name: Check committed schema is up to date
+        run: |
+          go build -C provider -o ../bin/pulumi-resource-exedev ./cmd/pulumi-resource-exedev
+          pulumi package get-schema ./bin/pulumi-resource-exedev > /tmp/schema.json
+          if ! diff -u provider/cmd/pulumi-resource-exedev/schema.json /tmp/schema.json; then
+            echo "::error::Committed schema.json is stale. Run 'make schema' and commit the result."
+            exit 1
+          fi

@@ -523,6 +523,147 @@ func (c *Client) SshKeyByMaterial(ctx context.Context, publicKey string) (*SshKe
 	return nil, false, nil
 }
 
+// IntegrationInfo is the JSON shape from `integrations list`. config is
+// type-specific; header values are masked, so they are not readable here.
+type IntegrationInfo struct {
+	Name        string         `json:"name"`
+	Type        string         `json:"type"`
+	Comment     string         `json:"comment"`
+	Attachments []string       `json:"attachments"`
+	Config      map[string]any `json:"config"`
+}
+
+func (i IntegrationInfo) Target() string {
+	if v, ok := i.Config["target"].(string); ok {
+		return v
+	}
+	return ""
+}
+
+// IntegrationSpec are the inputs to add/edit an http-proxy integration.
+type IntegrationSpec struct {
+	Name        string
+	Type        string
+	Target      string
+	Headers     map[string]string
+	Bearer      string
+	NoAuth      bool
+	Comment     string
+	Attachments []string
+}
+
+// integrations add/edit accept no --json and return an empty body on success.
+func (c *Client) IntegrationAdd(ctx context.Context, s IntegrationSpec) error {
+	cmd := newCmd("integrations")
+	cmd.raw("add")
+	cmd.literal(s.Type)
+	cmd.flag("name", s.Name)
+	if s.Target != "" {
+		cmd.flag("target", s.Target)
+	}
+	for _, k := range sortedKeys(s.Headers) {
+		cmd.flag("header", k+":"+s.Headers[k])
+	}
+	if s.Bearer != "" {
+		cmd.flag("bearer", s.Bearer)
+	}
+	if s.NoAuth {
+		cmd.raw("--no-auth")
+	}
+	if s.Comment != "" {
+		cmd.flag("comment", s.Comment)
+	}
+	for _, a := range s.Attachments {
+		cmd.flag("attach", a)
+	}
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return err
+	}
+	return bodyError(body)
+}
+
+// IntegrationEdit re-applies the mutable http-proxy fields.
+func (c *Client) IntegrationEdit(ctx context.Context, s IntegrationSpec) error {
+	cmd := newCmd("integrations")
+	cmd.raw("edit")
+	cmd.literal(s.Name)
+	if s.Target != "" {
+		cmd.flag("target", s.Target)
+	}
+	for _, k := range sortedKeys(s.Headers) {
+		cmd.flag("header", k+":"+s.Headers[k])
+	}
+	if s.Bearer != "" {
+		cmd.flag("bearer", s.Bearer)
+	}
+	if s.NoAuth {
+		cmd.raw("--no-auth")
+	}
+	cmd.flag("comment", s.Comment)
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return err
+	}
+	return bodyError(body)
+}
+
+func (c *Client) IntegrationRemove(ctx context.Context, name string) error {
+	cmd := newCmd("integrations")
+	cmd.raw("remove")
+	cmd.literal(name)
+	_, err := c.Exec(ctx, cmd.String())
+	var apiErr *APIError
+	if err != nil && errors.As(err, &apiErr) && apiErr.Status == http.StatusUnprocessableEntity &&
+		strings.Contains(strings.ToLower(apiErr.Body), "not found") {
+		return nil
+	}
+	return err
+}
+
+func (c *Client) IntegrationList(ctx context.Context) ([]IntegrationInfo, error) {
+	body, err := c.Exec(ctx, "integrations list --json")
+	if err != nil {
+		return nil, err
+	}
+	var list []IntegrationInfo
+	if err := json.Unmarshal(body, &list); err != nil {
+		return nil, fmt.Errorf("exe.dev: parsing integrations list: %w: %s", err, string(body))
+	}
+	return list, nil
+}
+
+func (c *Client) IntegrationGet(ctx context.Context, name string) (*IntegrationInfo, bool, error) {
+	list, err := c.IntegrationList(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	for i := range list {
+		if list[i].Name == name {
+			return &list[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
+func (c *Client) IntegrationAttach(ctx context.Context, name, spec string) error {
+	cmd := newCmd("integrations")
+	cmd.raw("attach")
+	cmd.literal(name)
+	cmd.literal(spec)
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
+func (c *Client) IntegrationDetach(ctx context.Context, name, spec string) error {
+	cmd := newCmd("integrations")
+	cmd.raw("detach")
+	cmd.literal(name)
+	cmd.literal(spec)
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
 // cmd accumulates shell-quoted command tokens.
 type cmd struct{ parts []string }
 

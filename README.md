@@ -14,8 +14,16 @@ Pulumi resource.
 ### Resources
 
 - `exedev:index:Vm` — a persistent Linux VM. The `public` and `port` inputs wrap
-  `share set-public`/`set-private` and `share port` to expose the HTTP proxy.
+  `share set-public`/`set-private` and `share port` to expose the HTTP proxy;
+  `receiveEmail` and `teamAccess` wrap `share receive-email` and `share access`.
 - `exedev:index:Domain` — a custom hostname attached to a VM (`domain add`/`rm`/`ls`).
+- `exedev:index:SshKey` — an account SSH key (`ssh-key add`/`remove`/`list`).
+- `exedev:index:Integration` — an http-proxy integration (`integrations add`/`edit`/
+  `remove`) with `attach`/`detach` reconciliation.
+
+### Functions
+
+- `exedev:index:getVm` — look up an existing VM by name.
 
 ## Configuration
 

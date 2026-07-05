@@ -1,7 +1,8 @@
-# Build output
+# Build output (anchored so the cmd/pulumi-resource-exedev source dir is not ignored)
 /bin/
-pulumi-resource-exedev
-pulumi-gen-exedev
+/dist/
+/provider/pulumi-resource-exedev
+/provider/pulumi-gen-exedev
 
 # Go
 *.test

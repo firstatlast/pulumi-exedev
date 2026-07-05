@@ -25,6 +25,7 @@
         "getVm.ts",
         "index.ts",
         "provider.ts",
+        "sshKey.ts",
         "utilities.ts",
         "vm.ts"
     ]

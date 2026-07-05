@@ -28,9 +28,13 @@ The token must be scoped to the commands the resource lifecycle uses — a
 default token only permits Create/Read. Generate one with:
 
 ```bash
-ssh exe.dev ssh-key generate-api-key --label=pulumi \
-  --cmds=new,ls,rm,resize,tag,comment,rename,domain,share --exp=30d
+ssh exe.dev 'ssh-key generate-api-key --label=pulumi --exp=30d --cmds="new,ls,rm,resize,rename,tag,comment,share set-public,share set-private,share port,share receive-email,share access allow,share access disallow,domain add,domain rm,domain ls,ssh-key add,ssh-key remove,ssh-key list"'
 ```
+
+`cmds` grants at the **subcommand** level, so multi-verb commands
+(`domain`, `share`, `ssh-key`) must list each subcommand — a bare `share`
+does not authorize `share set-public`. The outer single quotes keep the
+subcommand strings (which contain spaces) intact through `ssh`.
 
 ## Repository layout
 

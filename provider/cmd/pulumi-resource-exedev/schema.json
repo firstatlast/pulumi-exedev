@@ -151,6 +151,43 @@
         "hostname"
       ]
     },
+    "exedev:index:SshKey": {
+      "description": "An SSH public key registered on your exe.dev account.",
+      "properties": {
+        "fingerprint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "publicKey": {
+          "type": "string",
+          "description": "The SSH public key (e.g. 'ssh-ed25519 AAAA... comment'). The comment sets the key name. Changing this replaces the key."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Scope the key to VMs carrying this tag. Changing this replaces the key."
+        }
+      },
+      "required": [
+        "publicKey",
+        "name",
+        "fingerprint"
+      ],
+      "inputProperties": {
+        "publicKey": {
+          "type": "string",
+          "description": "The SSH public key (e.g. 'ssh-ed25519 AAAA... comment'). The comment sets the key name. Changing this replaces the key."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Scope the key to VMs carrying this tag. Changing this replaces the key."
+        }
+      },
+      "requiredInputs": [
+        "publicKey"
+      ]
+    },
     "exedev:index:Vm": {
       "description": "A persistent Linux VM on exe.dev.",
       "properties": {

@@ -36,9 +36,12 @@ token only permits create/read; the full lifecycle requires `rm`, `resize`, `tag
 `comment` and `rename`:
 
 ```bash
-ssh exe.dev ssh-key generate-api-key --label=pulumi \
-  --cmds=new,ls,rm,resize,tag,comment,rename,domain,share --exp=30d
+ssh exe.dev 'ssh-key generate-api-key --label=pulumi --exp=30d --cmds="new,ls,rm,resize,rename,tag,comment,share set-public,share set-private,share port,share receive-email,share access allow,share access disallow,domain add,domain rm,domain ls,ssh-key add,ssh-key remove,ssh-key list"'
 ```
+
+`cmds` grants per subcommand, so multi-verb commands (`domain`, `share`,
+`ssh-key`) list each subcommand; the outer single quotes preserve the spaces
+in those subcommand strings through `ssh`.
 
 Set it as a secret on the stack:
 

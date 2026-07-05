@@ -39,10 +39,14 @@ type Vm struct {
 	Name pulumi.StringPtrOutput `pulumi:"name"`
 	// Suppress the creation email notification.
 	NoEmail pulumi.BoolPtrOutput `pulumi:"noEmail"`
+	// Container port the HTTP proxy forwards to.
+	Port pulumi.IntPtrOutput `pulumi:"port"`
 	// Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.
-	Prompt        pulumi.StringPtrOutput `pulumi:"prompt"`
-	Region        pulumi.StringOutput    `pulumi:"region"`
-	RegionDisplay pulumi.StringOutput    `pulumi:"regionDisplay"`
+	Prompt pulumi.StringPtrOutput `pulumi:"prompt"`
+	// Make the HTTP proxy publicly accessible. Defaults to private.
+	Public        pulumi.BoolPtrOutput `pulumi:"public"`
+	Region        pulumi.StringOutput  `pulumi:"region"`
+	RegionDisplay pulumi.StringOutput  `pulumi:"regionDisplay"`
 	// Private registry credentials as USERNAME:PASSWORD for the --image registry.
 	RegistryAuth pulumi.StringPtrOutput `pulumi:"registryAuth"`
 	// Setup script run on first boot. Changing this replaces the VM.
@@ -121,8 +125,12 @@ type vmArgs struct {
 	Name *string `pulumi:"name"`
 	// Suppress the creation email notification.
 	NoEmail *bool `pulumi:"noEmail"`
+	// Container port the HTTP proxy forwards to.
+	Port *int `pulumi:"port"`
 	// Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.
 	Prompt *string `pulumi:"prompt"`
+	// Make the HTTP proxy publicly accessible. Defaults to private.
+	Public *bool `pulumi:"public"`
 	// Private registry credentials as USERNAME:PASSWORD for the --image registry.
 	RegistryAuth *string `pulumi:"registryAuth"`
 	// Setup script run on first boot. Changing this replaces the VM.
@@ -153,8 +161,12 @@ type VmArgs struct {
 	Name pulumi.StringPtrInput
 	// Suppress the creation email notification.
 	NoEmail pulumi.BoolPtrInput
+	// Container port the HTTP proxy forwards to.
+	Port pulumi.IntPtrInput
 	// Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.
 	Prompt pulumi.StringPtrInput
+	// Make the HTTP proxy publicly accessible. Defaults to private.
+	Public pulumi.BoolPtrInput
 	// Private registry credentials as USERNAME:PASSWORD for the --image registry.
 	RegistryAuth pulumi.StringPtrInput
 	// Setup script run on first boot. Changing this replaces the VM.
@@ -316,9 +328,19 @@ func (o VmOutput) NoEmail() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Vm) pulumi.BoolPtrOutput { return v.NoEmail }).(pulumi.BoolPtrOutput)
 }
 
+// Container port the HTTP proxy forwards to.
+func (o VmOutput) Port() pulumi.IntPtrOutput {
+	return o.ApplyT(func(v *Vm) pulumi.IntPtrOutput { return v.Port }).(pulumi.IntPtrOutput)
+}
+
 // Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.
 func (o VmOutput) Prompt() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Vm) pulumi.StringPtrOutput { return v.Prompt }).(pulumi.StringPtrOutput)
+}
+
+// Make the HTTP proxy publicly accessible. Defaults to private.
+func (o VmOutput) Public() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Vm) pulumi.BoolPtrOutput { return v.Public }).(pulumi.BoolPtrOutput)
 }
 
 func (o VmOutput) Region() pulumi.StringOutput {

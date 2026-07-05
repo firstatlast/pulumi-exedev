@@ -29,7 +29,7 @@ token only permits create/read; the full lifecycle requires `rm`, `resize`, `tag
 
 ```bash
 ssh exe.dev ssh-key generate-api-key --label=pulumi \
-  --cmds=new,ls,rm,resize,tag,comment,rename --exp=30d
+  --cmds=new,ls,rm,resize,tag,comment,rename,domain,share --exp=30d
 ```
 
 Set it as a secret on the stack:

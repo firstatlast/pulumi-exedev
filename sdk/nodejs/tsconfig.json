@@ -21,6 +21,7 @@
     "files": [
         "config/index.ts",
         "config/vars.ts",
+        "domain.ts",
         "index.ts",
         "provider.ts",
         "utilities.ts",

@@ -79,9 +79,17 @@ export class Vm extends pulumi.CustomResource {
      */
     declare public readonly noEmail: pulumi.Output<boolean | undefined>;
     /**
+     * Container port the HTTP proxy forwards to.
+     */
+    declare public readonly port: pulumi.Output<number | undefined>;
+    /**
      * Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.
      */
     declare public readonly prompt: pulumi.Output<string | undefined>;
+    /**
+     * Make the HTTP proxy publicly accessible. Defaults to private.
+     */
+    declare public readonly public: pulumi.Output<boolean | undefined>;
     declare public /*out*/ readonly region: pulumi.Output<string>;
     declare public /*out*/ readonly regionDisplay: pulumi.Output<string>;
     /**
@@ -121,7 +129,9 @@ export class Vm extends pulumi.CustomResource {
             resourceInputs["memory"] = args?.memory;
             resourceInputs["name"] = args?.name;
             resourceInputs["noEmail"] = args?.noEmail;
+            resourceInputs["port"] = args?.port;
             resourceInputs["prompt"] = args?.prompt;
+            resourceInputs["public"] = args?.public;
             resourceInputs["registryAuth"] = args?.registryAuth ? pulumi.secret(args.registryAuth) : undefined;
             resourceInputs["setupScript"] = args?.setupScript;
             resourceInputs["tags"] = args?.tags;
@@ -149,7 +159,9 @@ export class Vm extends pulumi.CustomResource {
             resourceInputs["memoryBytes"] = undefined /*out*/;
             resourceInputs["name"] = undefined /*out*/;
             resourceInputs["noEmail"] = undefined /*out*/;
+            resourceInputs["port"] = undefined /*out*/;
             resourceInputs["prompt"] = undefined /*out*/;
+            resourceInputs["public"] = undefined /*out*/;
             resourceInputs["region"] = undefined /*out*/;
             resourceInputs["regionDisplay"] = undefined /*out*/;
             resourceInputs["registryAuth"] = undefined /*out*/;
@@ -211,9 +223,17 @@ export interface VmArgs {
      */
     noEmail?: pulumi.Input<boolean | undefined>;
     /**
+     * Container port the HTTP proxy forwards to.
+     */
+    port?: pulumi.Input<number | undefined>;
+    /**
      * Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.
      */
     prompt?: pulumi.Input<string | undefined>;
+    /**
+     * Make the HTTP proxy publicly accessible. Defaults to private.
+     */
+    public?: pulumi.Input<boolean | undefined>;
     /**
      * Private registry credentials as USERNAME:PASSWORD for the --image registry.
      */

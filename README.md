@@ -13,7 +13,9 @@ Pulumi resource.
 
 ### Resources
 
-- `exedev:index:Vm` — a persistent Linux VM.
+- `exedev:index:Vm` — a persistent Linux VM. The `public` and `port` inputs wrap
+  `share set-public`/`set-private` and `share port` to expose the HTTP proxy.
+- `exedev:index:Domain` — a custom hostname attached to a VM (`domain add`/`rm`/`ls`).
 
 ## Configuration
 
@@ -27,7 +29,7 @@ default token only permits Create/Read. Generate one with:
 
 ```bash
 ssh exe.dev ssh-key generate-api-key --label=pulumi \
-  --cmds=new,ls,rm,resize,tag,comment,rename --exp=30d
+  --cmds=new,ls,rm,resize,tag,comment,rename,domain,share --exp=30d
 ```
 
 ## Repository layout

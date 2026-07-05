@@ -279,6 +279,98 @@ func (c *Client) SetComment(ctx context.Context, name, text string) error {
 	return err
 }
 
+// Domain is a custom domain attached to a VM. Field names are parsed leniently
+// since the exact `domain ls --json` shape is not yet verified against the API.
+type DomainInfo struct {
+	VM       string `json:"vm_name,omitempty"`
+	Domain   string `json:"domain,omitempty"`
+	Hostname string `json:"hostname,omitempty"`
+	Verified bool   `json:"verified,omitempty"`
+	Wildcard bool   `json:"wildcard,omitempty"`
+}
+
+// name returns whichever field carries the hostname.
+func (d DomainInfo) name() string {
+	if d.Domain != "" {
+		return d.Domain
+	}
+	return d.Hostname
+}
+
+func (c *Client) DomainAdd(ctx context.Context, vm, hostname string, wildcard bool) error {
+	cmd := newCmd("domain")
+	cmd.raw("add")
+	if wildcard {
+		cmd.raw("--wildcard")
+	}
+	cmd.literal(vm)
+	cmd.literal(hostname)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
+func (c *Client) DomainRemove(ctx context.Context, vm, hostname string) error {
+	cmd := newCmd("domain")
+	cmd.raw("rm")
+	cmd.literal(vm)
+	cmd.literal(hostname)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	var apiErr *APIError
+	if err != nil && errors.As(err, &apiErr) && apiErr.Status == http.StatusUnprocessableEntity &&
+		strings.Contains(strings.ToLower(apiErr.Body), "not found") {
+		return nil
+	}
+	return err
+}
+
+// DomainGet returns the domain on vm matching hostname, or (nil, false).
+func (c *Client) DomainGet(ctx context.Context, vm, hostname string) (*DomainInfo, bool, error) {
+	cmd := newCmd("domain")
+	cmd.raw("ls")
+	cmd.literal(vm)
+	cmd.raw("--json")
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return nil, false, err
+	}
+	domains, err := parseDomains(body)
+	if err != nil {
+		return nil, false, err
+	}
+	for i := range domains {
+		if domains[i].name() == hostname {
+			return &domains[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
+func (c *Client) SharePort(ctx context.Context, vm string, port int) error {
+	cmd := newCmd("share")
+	cmd.raw("port")
+	cmd.literal(vm)
+	cmd.literal(strconv.Itoa(port))
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
+// ShareSetPublic flips the VM proxy between public and authenticated-only.
+func (c *Client) ShareSetPublic(ctx context.Context, vm string, public bool) error {
+	cmd := newCmd("share")
+	if public {
+		cmd.raw("set-public")
+	} else {
+		cmd.raw("set-private")
+	}
+	cmd.literal(vm)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
 // cmd accumulates shell-quoted command tokens.
 type cmd struct{ parts []string }
 
@@ -323,6 +415,21 @@ func parseVM(data []byte) (*VM, error) {
 		return &vm, nil
 	}
 	return nil, fmt.Errorf("exe.dev: could not parse VM from response: %s", string(data))
+}
+
+// parseDomains tolerates {"domains":[..]} or a bare array from `domain ls`.
+func parseDomains(data []byte) ([]DomainInfo, error) {
+	var wrap struct {
+		Domains []DomainInfo `json:"domains"`
+	}
+	if err := json.Unmarshal(data, &wrap); err == nil && wrap.Domains != nil {
+		return wrap.Domains, nil
+	}
+	var arr []DomainInfo
+	if err := json.Unmarshal(data, &arr); err == nil {
+		return arr, nil
+	}
+	return nil, fmt.Errorf("exe.dev: could not parse domains from response: %s", string(data))
 }
 
 var sizeRe = regexp.MustCompile(`^\s*(\d+)\s*([a-zA-Z]*)\s*$`)

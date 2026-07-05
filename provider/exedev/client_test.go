@@ -78,6 +78,35 @@ func TestDiffTags(t *testing.T) {
 	}
 }
 
+func TestParseDomains(t *testing.T) {
+	// {"domains":[..]} with the hostname under "domain"
+	ds, err := parseDomains([]byte(`{"domains":[{"domain":"api.example.com","verified":true}]}`))
+	if err != nil || len(ds) != 1 || ds[0].name() != "api.example.com" || !ds[0].Verified {
+		t.Errorf("domains-wrap: %+v, %v", ds, err)
+	}
+	// bare array with the hostname under "hostname"
+	ds, err = parseDomains([]byte(`[{"hostname":"x.example.com"}]`))
+	if err != nil || len(ds) != 1 || ds[0].name() != "x.example.com" {
+		t.Errorf("bare-array: %+v, %v", ds, err)
+	}
+	if _, err := parseDomains([]byte(`not json`)); err == nil {
+		t.Error("expected error for unparseable domains")
+	}
+}
+
+func TestDomainID(t *testing.T) {
+	if got := domainID("vm1", "api.example.com"); got != "vm1/api.example.com" {
+		t.Errorf("domainID = %q", got)
+	}
+	vm, host, err := splitDomainID("vm1/api.example.com")
+	if err != nil || vm != "vm1" || host != "api.example.com" {
+		t.Errorf("splitDomainID = %q, %q, %v", vm, host, err)
+	}
+	if _, _, err := splitDomainID("no-slash"); err == nil {
+		t.Error("expected error for id without slash")
+	}
+}
+
 func TestSortedKeys(t *testing.T) {
 	got := sortedKeys(map[string]string{"z": "1", "a": "2", "m": "3"})
 	if !sliceEq(got, []string{"a", "m", "z"}) {

@@ -25,6 +25,8 @@ type VmArgs struct {
 	Prompt       *string           `pulumi:"prompt,optional"`
 	RegistryAuth *string           `pulumi:"registryAuth,optional" provider:"secret"`
 	NoEmail      *bool             `pulumi:"noEmail,optional"`
+	Public       *bool             `pulumi:"public,optional"`
+	Port         *int              `pulumi:"port,optional"`
 }
 
 type VmState struct {
@@ -70,6 +72,8 @@ func (a *VmArgs) Annotate(an infer.Annotator) {
 	an.Describe(&a.Prompt, "Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.")
 	an.Describe(&a.RegistryAuth, "Private registry credentials as USERNAME:PASSWORD for the --image registry.")
 	an.Describe(&a.NoEmail, "Suppress the creation email notification.")
+	an.Describe(&a.Public, "Make the HTTP proxy publicly accessible. Defaults to private.")
+	an.Describe(&a.Port, "Container port the HTTP proxy forwards to.")
 }
 
 func (Vm) Check(ctx context.Context, req infer.CheckRequest) (infer.CheckResponse[VmArgs], error) {
@@ -112,8 +116,31 @@ func (Vm) Create(ctx context.Context, req infer.CreateRequest[VmArgs]) (infer.Cr
 	if final, ok := waitForReady(ctx, client, vm.Name); ok {
 		vm = final
 	}
+	if err := applyShare(ctx, client, vm.Name, nil, in); err != nil {
+		return infer.CreateResponse[VmState]{}, err
+	}
 	applyVM(&state, vm)
 	return infer.CreateResponse[VmState]{ID: vm.Name, Output: state}, nil
+}
+
+// applyShare reconciles the public/port share settings from old -> new. old is nil
+// on create (defaults: private, no explicit port).
+func applyShare(ctx context.Context, client *Client, name string, old *VmArgs, in VmArgs) error {
+	oldPort, oldPublic := (*int)(nil), (*bool)(nil)
+	if old != nil {
+		oldPort, oldPublic = old.Port, old.Public
+	}
+	if in.Port != nil && !intEq(in.Port, oldPort) {
+		if err := client.SharePort(ctx, name, *in.Port); err != nil {
+			return err
+		}
+	}
+	if in.Public != nil && (oldPublic == nil || *in.Public != *oldPublic) {
+		if err := client.ShareSetPublic(ctx, name, *in.Public); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (Vm) Read(ctx context.Context, req infer.ReadRequest[VmArgs, VmState]) (infer.ReadResponse[VmArgs, VmState], error) {
@@ -182,6 +209,10 @@ func (Vm) Update(ctx context.Context, req infer.UpdateRequest[VmArgs, VmState]) 
 		}
 	}
 
+	if err := applyShare(ctx, client, name, &old.VmArgs, in); err != nil {
+		return infer.UpdateResponse[VmState]{}, err
+	}
+
 	if vm, ok, err := client.Get(ctx, name); err == nil && ok {
 		applyVM(&state, vm)
 	}
@@ -224,6 +255,8 @@ func (Vm) Diff(_ context.Context, req infer.DiffRequest[VmArgs, VmState]) (infer
 	update("memory", !strEq(in.Memory, old.Memory))
 	update("comment", !strEq(in.Comment, old.Comment))
 	update("tags", !setEq(in.Tags, old.Tags))
+	update("port", !intEq(in.Port, old.Port))
+	update("public", boolPtr(in.Public) != boolPtr(old.Public))
 
 	// Disk grows in place; shrinking is not supported so it forces a replace.
 	if !strEq(in.Disk, old.Disk) {

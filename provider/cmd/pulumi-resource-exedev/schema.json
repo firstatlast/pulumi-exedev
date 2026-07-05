@@ -360,5 +360,80 @@
         }
       }
     }
+  },
+  "functions": {
+    "exedev:index:getVm": {
+      "description": "Look up an existing exe.dev VM by name.",
+      "inputs": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the VM to look up."
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ]
+      },
+      "outputs": {
+        "properties": {
+          "allocatedCpus": {
+            "type": "integer"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "diskBytes": {
+            "type": "integer"
+          },
+          "httpsUrl": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "memoryBytes": {
+            "type": "integer"
+          },
+          "region": {
+            "type": "string"
+          },
+          "regionDisplay": {
+            "type": "string"
+          },
+          "sshDest": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "vmName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "vmName",
+          "httpsUrl",
+          "sshDest",
+          "region",
+          "regionDisplay",
+          "status",
+          "image",
+          "comment",
+          "tags",
+          "allocatedCpus",
+          "memoryBytes",
+          "diskBytes"
+        ],
+        "type": "object"
+      }
+    }
   }
 }

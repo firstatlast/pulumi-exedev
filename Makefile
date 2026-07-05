@@ -11,9 +11,11 @@ LDFLAGS       := -X main.Version=$(VERSION)
 build:
 	cd $(PROVIDER_PATH) && go build -ldflags "$(LDFLAGS)" -o ../$(BIN) ./cmd/$(PROVIDER)
 
-## emit the Pulumi schema to schema.json
+SCHEMA := provider/cmd/$(PROVIDER)/schema.json
+
+## emit the Pulumi schema (committed for the registry listing)
 schema: build
-	pulumi package get-schema ./$(BIN) > schema.json
+	pulumi package get-schema ./$(BIN) > $(SCHEMA)
 
 ## generate all SDKs
 sdk: sdk_go sdk_nodejs
@@ -46,4 +48,4 @@ tidy:
 	cd $(PROVIDER_PATH) && go mod tidy
 
 clean:
-	rm -rf bin schema.json
+	rm -rf bin dist

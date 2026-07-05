@@ -1,0 +1,348 @@
+{
+  "name": "exedev",
+  "displayName": "exe.dev",
+  "version": "0.2.0",
+  "description": "A Pulumi provider for managing exe.dev VMs.",
+  "keywords": [
+    "exe.dev",
+    "vm",
+    "compute",
+    "category/cloud"
+  ],
+  "homepage": "https://exe.dev",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/firstatlast/pulumi-exedev",
+  "pluginDownloadURL": "github://api.github.com/firstatlast/pulumi-exedev",
+  "publisher": "firstatlast",
+  "namespace": "firstatlast",
+  "language": {
+    "csharp": {
+      "respectSchemaVersion": true
+    },
+    "go": {
+      "generateResourceContainerTypes": true,
+      "importBasePath": "github.com/firstatlast/pulumi-exedev/sdk/go/exedev",
+      "respectSchemaVersion": true
+    },
+    "nodejs": {
+      "respectSchemaVersion": true
+    },
+    "python": {
+      "pyproject": {
+        "enabled": true
+      },
+      "respectSchemaVersion": true
+    }
+  },
+  "config": {
+    "variables": {
+      "endpoint": {
+        "type": "string",
+        "description": "Override for the exe.dev exec endpoint.",
+        "default": "https://exe.dev/exec",
+        "defaultInfo": {
+          "environment": [
+            "EXEDEV_ENDPOINT"
+          ]
+        }
+      },
+      "token": {
+        "type": "string",
+        "description": "exe.dev bearer API token. Generate with `ssh exe.dev ssh-key generate-api-key --exp=30d`.",
+        "default": "",
+        "defaultInfo": {
+          "environment": [
+            "EXEDEV_TOKEN"
+          ]
+        },
+        "secret": true
+      }
+    }
+  },
+  "provider": {
+    "properties": {
+      "endpoint": {
+        "type": "string",
+        "description": "Override for the exe.dev exec endpoint.",
+        "default": "https://exe.dev/exec",
+        "defaultInfo": {
+          "environment": [
+            "EXEDEV_ENDPOINT"
+          ]
+        }
+      },
+      "token": {
+        "type": "string",
+        "description": "exe.dev bearer API token. Generate with `ssh exe.dev ssh-key generate-api-key --exp=30d`.",
+        "default": "",
+        "defaultInfo": {
+          "environment": [
+            "EXEDEV_TOKEN"
+          ]
+        },
+        "secret": true
+      }
+    },
+    "inputProperties": {
+      "endpoint": {
+        "type": "string",
+        "description": "Override for the exe.dev exec endpoint.",
+        "default": "https://exe.dev/exec",
+        "defaultInfo": {
+          "environment": [
+            "EXEDEV_ENDPOINT"
+          ]
+        }
+      },
+      "token": {
+        "type": "string",
+        "description": "exe.dev bearer API token. Generate with `ssh exe.dev ssh-key generate-api-key --exp=30d`.",
+        "default": "",
+        "defaultInfo": {
+          "environment": [
+            "EXEDEV_TOKEN"
+          ]
+        },
+        "secret": true
+      }
+    }
+  },
+  "resources": {
+    "exedev:index:Domain": {
+      "description": "A custom domain linked to an exe.dev VM.",
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "description": "The custom hostname (a CNAME you already point at the VM). Changing this replaces the domain."
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "vm": {
+          "type": "string",
+          "description": "Name of the VM to attach the domain to. Changing this replaces the domain."
+        },
+        "wildcard": {
+          "type": "boolean",
+          "description": "Issue a wildcard (*.\u003cparent\u003e) certificate via DNS-01 delegation."
+        }
+      },
+      "required": [
+        "vm",
+        "hostname",
+        "verified"
+      ],
+      "inputProperties": {
+        "hostname": {
+          "type": "string",
+          "description": "The custom hostname (a CNAME you already point at the VM). Changing this replaces the domain."
+        },
+        "vm": {
+          "type": "string",
+          "description": "Name of the VM to attach the domain to. Changing this replaces the domain."
+        },
+        "wildcard": {
+          "type": "boolean",
+          "description": "Issue a wildcard (*.\u003cparent\u003e) certificate via DNS-01 delegation."
+        }
+      },
+      "requiredInputs": [
+        "vm",
+        "hostname"
+      ]
+    },
+    "exedev:index:Vm": {
+      "description": "A persistent Linux VM on exe.dev.",
+      "properties": {
+        "allocatedCpus": {
+          "type": "integer"
+        },
+        "command": {
+          "type": "string",
+          "description": "Container command: auto, none, or a custom command. Changing this replaces the VM."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Short note about the VM (max 200 bytes)."
+        },
+        "cpu": {
+          "type": "integer",
+          "description": "Number of CPUs."
+        },
+        "disk": {
+          "type": "string",
+          "description": "Disk size, e.g. 20GB. Can only grow; shrinking replaces the VM."
+        },
+        "diskBytes": {
+          "type": "integer"
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables. Changing these replaces the VM."
+        },
+        "httpsUrl": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string",
+          "description": "Container image (e.g. ubuntu:22.04). Changing this replaces the VM."
+        },
+        "integrations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Integrations to attach at creation. Changing these replaces the VM."
+        },
+        "memory": {
+          "type": "string",
+          "description": "Memory allocation, e.g. 4GB."
+        },
+        "memoryBytes": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "description": "VM name. Auto-generated by exe.dev if omitted. Changing this replaces the VM."
+        },
+        "noEmail": {
+          "type": "boolean",
+          "description": "Suppress the creation email notification."
+        },
+        "port": {
+          "type": "integer",
+          "description": "Container port the HTTP proxy forwards to."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time."
+        },
+        "public": {
+          "type": "boolean",
+          "description": "Make the HTTP proxy publicly accessible. Defaults to private."
+        },
+        "region": {
+          "type": "string"
+        },
+        "regionDisplay": {
+          "type": "string"
+        },
+        "registryAuth": {
+          "type": "string",
+          "description": "Private registry credentials as USERNAME:PASSWORD for the --image registry.",
+          "secret": true
+        },
+        "setupScript": {
+          "type": "string",
+          "description": "Setup script run on first boot. Changing this replaces the VM."
+        },
+        "sshDest": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags applied to the VM."
+        },
+        "vmName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vmName",
+        "httpsUrl",
+        "sshDest",
+        "region",
+        "regionDisplay",
+        "status",
+        "allocatedCpus",
+        "memoryBytes",
+        "diskBytes"
+      ],
+      "inputProperties": {
+        "command": {
+          "type": "string",
+          "description": "Container command: auto, none, or a custom command. Changing this replaces the VM."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Short note about the VM (max 200 bytes)."
+        },
+        "cpu": {
+          "type": "integer",
+          "description": "Number of CPUs."
+        },
+        "disk": {
+          "type": "string",
+          "description": "Disk size, e.g. 20GB. Can only grow; shrinking replaces the VM."
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables. Changing these replaces the VM."
+        },
+        "image": {
+          "type": "string",
+          "description": "Container image (e.g. ubuntu:22.04). Changing this replaces the VM."
+        },
+        "integrations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Integrations to attach at creation. Changing these replaces the VM."
+        },
+        "memory": {
+          "type": "string",
+          "description": "Memory allocation, e.g. 4GB."
+        },
+        "name": {
+          "type": "string",
+          "description": "VM name. Auto-generated by exe.dev if omitted. Changing this replaces the VM."
+        },
+        "noEmail": {
+          "type": "boolean",
+          "description": "Suppress the creation email notification."
+        },
+        "port": {
+          "type": "integer",
+          "description": "Container port the HTTP proxy forwards to."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time."
+        },
+        "public": {
+          "type": "boolean",
+          "description": "Make the HTTP proxy publicly accessible. Defaults to private."
+        },
+        "registryAuth": {
+          "type": "string",
+          "description": "Private registry credentials as USERNAME:PASSWORD for the --image registry.",
+          "secret": true
+        },
+        "setupScript": {
+          "type": "string",
+          "description": "Setup script run on first boot. Changing this replaces the VM."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags applied to the VM."
+        }
+      }
+    }
+  }
+}

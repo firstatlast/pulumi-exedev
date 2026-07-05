@@ -371,6 +371,36 @@ func (c *Client) ShareSetPublic(ctx context.Context, vm string, public bool) err
 	return err
 }
 
+// ShareReceiveEmail toggles inbound email for a VM (share receive-email <vm> on|off).
+func (c *Client) ShareReceiveEmail(ctx context.Context, vm string, on bool) error {
+	cmd := newCmd("share")
+	cmd.raw("receive-email")
+	cmd.literal(vm)
+	if on {
+		cmd.raw("on")
+	} else {
+		cmd.raw("off")
+	}
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
+// ShareAccess toggles team SSH/Shelley/web access (share access allow|disallow <vm>).
+func (c *Client) ShareAccess(ctx context.Context, vm string, allow bool) error {
+	cmd := newCmd("share")
+	cmd.raw("access")
+	if allow {
+		cmd.raw("allow")
+	} else {
+		cmd.raw("disallow")
+	}
+	cmd.literal(vm)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	return err
+}
+
 // cmd accumulates shell-quoted command tokens.
 type cmd struct{ parts []string }
 

@@ -44,7 +44,9 @@ type Vm struct {
 	// Initial prompt sent to Shelley after creation (requires the exeuntu image). Applied only at create time.
 	Prompt pulumi.StringPtrOutput `pulumi:"prompt"`
 	// Make the HTTP proxy publicly accessible. Defaults to private.
-	Public        pulumi.BoolPtrOutput `pulumi:"public"`
+	Public pulumi.BoolPtrOutput `pulumi:"public"`
+	// Enable inbound email delivery to the VM.
+	ReceiveEmail  pulumi.BoolPtrOutput `pulumi:"receiveEmail"`
 	Region        pulumi.StringOutput  `pulumi:"region"`
 	RegionDisplay pulumi.StringOutput  `pulumi:"regionDisplay"`
 	// Private registry credentials as USERNAME:PASSWORD for the --image registry.
@@ -54,8 +56,10 @@ type Vm struct {
 	SshDest     pulumi.StringOutput    `pulumi:"sshDest"`
 	Status      pulumi.StringOutput    `pulumi:"status"`
 	// Tags applied to the VM.
-	Tags   pulumi.StringArrayOutput `pulumi:"tags"`
-	VmName pulumi.StringOutput      `pulumi:"vmName"`
+	Tags pulumi.StringArrayOutput `pulumi:"tags"`
+	// Allow team members SSH, Shelley, and web-proxy access to the VM.
+	TeamAccess pulumi.BoolPtrOutput `pulumi:"teamAccess"`
+	VmName     pulumi.StringOutput  `pulumi:"vmName"`
 }
 
 // NewVm registers a new resource with the given unique name, arguments, and options.
@@ -131,12 +135,16 @@ type vmArgs struct {
 	Prompt *string `pulumi:"prompt"`
 	// Make the HTTP proxy publicly accessible. Defaults to private.
 	Public *bool `pulumi:"public"`
+	// Enable inbound email delivery to the VM.
+	ReceiveEmail *bool `pulumi:"receiveEmail"`
 	// Private registry credentials as USERNAME:PASSWORD for the --image registry.
 	RegistryAuth *string `pulumi:"registryAuth"`
 	// Setup script run on first boot. Changing this replaces the VM.
 	SetupScript *string `pulumi:"setupScript"`
 	// Tags applied to the VM.
 	Tags []string `pulumi:"tags"`
+	// Allow team members SSH, Shelley, and web-proxy access to the VM.
+	TeamAccess *bool `pulumi:"teamAccess"`
 }
 
 // The set of arguments for constructing a Vm resource.
@@ -167,12 +175,16 @@ type VmArgs struct {
 	Prompt pulumi.StringPtrInput
 	// Make the HTTP proxy publicly accessible. Defaults to private.
 	Public pulumi.BoolPtrInput
+	// Enable inbound email delivery to the VM.
+	ReceiveEmail pulumi.BoolPtrInput
 	// Private registry credentials as USERNAME:PASSWORD for the --image registry.
 	RegistryAuth pulumi.StringPtrInput
 	// Setup script run on first boot. Changing this replaces the VM.
 	SetupScript pulumi.StringPtrInput
 	// Tags applied to the VM.
 	Tags pulumi.StringArrayInput
+	// Allow team members SSH, Shelley, and web-proxy access to the VM.
+	TeamAccess pulumi.BoolPtrInput
 }
 
 func (VmArgs) ElementType() reflect.Type {
@@ -343,6 +355,11 @@ func (o VmOutput) Public() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Vm) pulumi.BoolPtrOutput { return v.Public }).(pulumi.BoolPtrOutput)
 }
 
+// Enable inbound email delivery to the VM.
+func (o VmOutput) ReceiveEmail() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Vm) pulumi.BoolPtrOutput { return v.ReceiveEmail }).(pulumi.BoolPtrOutput)
+}
+
 func (o VmOutput) Region() pulumi.StringOutput {
 	return o.ApplyT(func(v *Vm) pulumi.StringOutput { return v.Region }).(pulumi.StringOutput)
 }
@@ -372,6 +389,11 @@ func (o VmOutput) Status() pulumi.StringOutput {
 // Tags applied to the VM.
 func (o VmOutput) Tags() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v *Vm) pulumi.StringArrayOutput { return v.Tags }).(pulumi.StringArrayOutput)
+}
+
+// Allow team members SSH, Shelley, and web-proxy access to the VM.
+func (o VmOutput) TeamAccess() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Vm) pulumi.BoolPtrOutput { return v.TeamAccess }).(pulumi.BoolPtrOutput)
 }
 
 func (o VmOutput) VmName() pulumi.StringOutput {

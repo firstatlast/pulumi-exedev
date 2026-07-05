@@ -224,6 +224,10 @@
           "type": "boolean",
           "description": "Make the HTTP proxy publicly accessible. Defaults to private."
         },
+        "receiveEmail": {
+          "type": "boolean",
+          "description": "Enable inbound email delivery to the VM."
+        },
         "region": {
           "type": "string"
         },
@@ -251,6 +255,10 @@
             "type": "string"
           },
           "description": "Tags applied to the VM."
+        },
+        "teamAccess": {
+          "type": "boolean",
+          "description": "Allow team members SSH, Shelley, and web-proxy access to the VM."
         },
         "vmName": {
           "type": "string"
@@ -326,6 +334,10 @@
           "type": "boolean",
           "description": "Make the HTTP proxy publicly accessible. Defaults to private."
         },
+        "receiveEmail": {
+          "type": "boolean",
+          "description": "Enable inbound email delivery to the VM."
+        },
         "registryAuth": {
           "type": "string",
           "description": "Private registry credentials as USERNAME:PASSWORD for the --image registry.",
@@ -341,6 +353,10 @@
             "type": "string"
           },
           "description": "Tags applied to the VM."
+        },
+        "teamAccess": {
+          "type": "boolean",
+          "description": "Allow team members SSH, Shelley, and web-proxy access to the VM."
         }
       }
     }

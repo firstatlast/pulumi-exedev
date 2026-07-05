@@ -90,6 +90,10 @@ export class Vm extends pulumi.CustomResource {
      * Make the HTTP proxy publicly accessible. Defaults to private.
      */
     declare public readonly public: pulumi.Output<boolean | undefined>;
+    /**
+     * Enable inbound email delivery to the VM.
+     */
+    declare public readonly receiveEmail: pulumi.Output<boolean | undefined>;
     declare public /*out*/ readonly region: pulumi.Output<string>;
     declare public /*out*/ readonly regionDisplay: pulumi.Output<string>;
     /**
@@ -106,6 +110,10 @@ export class Vm extends pulumi.CustomResource {
      * Tags applied to the VM.
      */
     declare public readonly tags: pulumi.Output<string[] | undefined>;
+    /**
+     * Allow team members SSH, Shelley, and web-proxy access to the VM.
+     */
+    declare public readonly teamAccess: pulumi.Output<boolean | undefined>;
     declare public /*out*/ readonly vmName: pulumi.Output<string>;
 
     /**
@@ -132,9 +140,11 @@ export class Vm extends pulumi.CustomResource {
             resourceInputs["port"] = args?.port;
             resourceInputs["prompt"] = args?.prompt;
             resourceInputs["public"] = args?.public;
+            resourceInputs["receiveEmail"] = args?.receiveEmail;
             resourceInputs["registryAuth"] = args?.registryAuth ? pulumi.secret(args.registryAuth) : undefined;
             resourceInputs["setupScript"] = args?.setupScript;
             resourceInputs["tags"] = args?.tags;
+            resourceInputs["teamAccess"] = args?.teamAccess;
             resourceInputs["allocatedCpus"] = undefined /*out*/;
             resourceInputs["diskBytes"] = undefined /*out*/;
             resourceInputs["httpsUrl"] = undefined /*out*/;
@@ -162,6 +172,7 @@ export class Vm extends pulumi.CustomResource {
             resourceInputs["port"] = undefined /*out*/;
             resourceInputs["prompt"] = undefined /*out*/;
             resourceInputs["public"] = undefined /*out*/;
+            resourceInputs["receiveEmail"] = undefined /*out*/;
             resourceInputs["region"] = undefined /*out*/;
             resourceInputs["regionDisplay"] = undefined /*out*/;
             resourceInputs["registryAuth"] = undefined /*out*/;
@@ -169,6 +180,7 @@ export class Vm extends pulumi.CustomResource {
             resourceInputs["sshDest"] = undefined /*out*/;
             resourceInputs["status"] = undefined /*out*/;
             resourceInputs["tags"] = undefined /*out*/;
+            resourceInputs["teamAccess"] = undefined /*out*/;
             resourceInputs["vmName"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
@@ -235,6 +247,10 @@ export interface VmArgs {
      */
     public?: pulumi.Input<boolean | undefined>;
     /**
+     * Enable inbound email delivery to the VM.
+     */
+    receiveEmail?: pulumi.Input<boolean | undefined>;
+    /**
      * Private registry credentials as USERNAME:PASSWORD for the --image registry.
      */
     registryAuth?: pulumi.Input<string | undefined>;
@@ -246,4 +262,8 @@ export interface VmArgs {
      * Tags applied to the VM.
      */
     tags?: pulumi.Input<pulumi.Input<string>[] | undefined>;
+    /**
+     * Allow team members SSH, Shelley, and web-proxy access to the VM.
+     */
+    teamAccess?: pulumi.Input<boolean | undefined>;
 }

@@ -75,6 +75,21 @@ parsing. The full lifecycle has been verified live against the exe.dev API:
 > TypeScript 6 note: consuming programs may need `"ignoreDeprecations": "6.0"` in
 > `tsconfig.json` (the generated SDK uses node-style module resolution).
 
+## Releasing
+
+Plugin binaries are published to GitHub Releases and the schema's
+`pluginDownloadURL` points there, so `pulumi package add exedev` (and the generated
+SDKs) auto-install the correct plugin.
+
+1. Bump versions (SDK `package.json`, any version references) and regenerate SDKs
+   with `make sdk`.
+2. Tag and push: `git tag v0.1.0 && git push origin v0.1.0`. The `release` workflow
+   cross-compiles for linux/darwin/windows (amd64+arm64), packages
+   `pulumi-resource-exedev-vX.Y.Z-<os>-<arch>.tar.gz`, and creates the GitHub Release.
+3. To list on the Pulumi Registry, open a PR to
+   [`pulumi/registry`](https://github.com/pulumi/registry) adding this package to
+   `community-packages/package-list.json` (repo + `docs/` reference).
+
 ## License
 
 Apache-2.0

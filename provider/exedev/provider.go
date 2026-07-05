@@ -17,6 +17,8 @@ func NewProvider() (p.Provider, error) {
 		WithDescription("A Pulumi provider for managing exe.dev VMs.").
 		WithHomepage("https://exe.dev").
 		WithRepository("https://github.com/firstatlast/pulumi-exedev").
+		WithPublisher("firstatlast").
+		WithPluginDownloadURL("github://api.github.com/firstatlast/pulumi-exedev").
 		WithGoImportPath("github.com/firstatlast/pulumi-exedev/sdk/go/exedev").
 		WithLicense("Apache-2.0").
 		WithKeywords("exe.dev", "vm", "compute", "category/cloud").

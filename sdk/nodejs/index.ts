@@ -20,6 +20,11 @@ export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
 utilities.lazyLoad(exports, ["Provider"], () => require("./provider"));
 
+export { SshKeyArgs } from "./sshKey";
+export type SshKey = import("./sshKey").SshKey;
+export const SshKey: typeof import("./sshKey").SshKey = null as any;
+utilities.lazyLoad(exports, ["SshKey"], () => require("./sshKey"));
+
 export { VmArgs } from "./vm";
 export type Vm = import("./vm").Vm;
 export const Vm: typeof import("./vm").Vm = null as any;
@@ -39,6 +44,8 @@ const _module = {
         switch (type) {
             case "exedev:index:Domain":
                 return new Domain(name, <any>undefined, { urn })
+            case "exedev:index:SshKey":
+                return new SshKey(name, <any>undefined, { urn })
             case "exedev:index:Vm":
                 return new Vm(name, <any>undefined, { urn })
             default:

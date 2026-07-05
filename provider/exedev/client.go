@@ -433,6 +433,96 @@ func (c *Client) ShareAccess(ctx context.Context, vm string, allow bool) error {
 	return err
 }
 
+// SshKeyInfo is the JSON shape from `ssh-key list`. The stored public_key drops
+// the comment; name is derived from the comment at add time.
+type SshKeyInfo struct {
+	PublicKey   string `json:"public_key"`
+	Fingerprint string `json:"fingerprint"`
+	Name        string `json:"name"`
+	Current     bool   `json:"current"`
+}
+
+// keyMaterial returns the "type base64" prefix of a public key, ignoring the comment.
+func keyMaterial(pubKey string) string {
+	f := strings.Fields(pubKey)
+	if len(f) >= 2 {
+		return f[0] + " " + f[1]
+	}
+	return strings.TrimSpace(pubKey)
+}
+
+func (c *Client) SshKeyAdd(ctx context.Context, publicKey, tag string) error {
+	cmd := newCmd("ssh-key")
+	cmd.raw("add")
+	if tag != "" {
+		cmd.flag("tag", tag)
+	}
+	cmd.literal(publicKey)
+	cmd.raw("--json")
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return err
+	}
+	return bodyError(body)
+}
+
+func (c *Client) SshKeyRemove(ctx context.Context, ref string) error {
+	cmd := newCmd("ssh-key")
+	cmd.raw("remove")
+	cmd.literal(ref)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	var apiErr *APIError
+	if err != nil && errors.As(err, &apiErr) && apiErr.Status == http.StatusUnprocessableEntity &&
+		strings.Contains(strings.ToLower(apiErr.Body), "not found") {
+		return nil
+	}
+	return err
+}
+
+func (c *Client) SshKeyList(ctx context.Context) ([]SshKeyInfo, error) {
+	body, err := c.Exec(ctx, "ssh-key list --json")
+	if err != nil {
+		return nil, err
+	}
+	var wrap struct {
+		Keys []SshKeyInfo `json:"ssh_keys"`
+	}
+	if err := json.Unmarshal(body, &wrap); err != nil {
+		return nil, fmt.Errorf("exe.dev: parsing ssh-key list: %w: %s", err, string(body))
+	}
+	return wrap.Keys, nil
+}
+
+// SshKeyByFingerprint finds a key by fingerprint.
+func (c *Client) SshKeyByFingerprint(ctx context.Context, fp string) (*SshKeyInfo, bool, error) {
+	keys, err := c.SshKeyList(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	for i := range keys {
+		if keys[i].Fingerprint == fp {
+			return &keys[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
+// SshKeyByMaterial finds a key by its type+base64 material, ignoring the comment.
+func (c *Client) SshKeyByMaterial(ctx context.Context, publicKey string) (*SshKeyInfo, bool, error) {
+	keys, err := c.SshKeyList(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	want := keyMaterial(publicKey)
+	for i := range keys {
+		if keyMaterial(keys[i].PublicKey) == want {
+			return &keys[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
 // cmd accumulates shell-quoted command tokens.
 type cmd struct{ parts []string }
 

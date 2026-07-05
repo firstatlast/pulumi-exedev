@@ -119,6 +119,20 @@ func TestDomainID(t *testing.T) {
 	}
 }
 
+func TestKeyMaterial(t *testing.T) {
+	// comment ignored; type+base64 preserved
+	if got := keyMaterial("ssh-ed25519 AAAABASE64 my-laptop"); got != "ssh-ed25519 AAAABASE64" {
+		t.Errorf("keyMaterial = %q", got)
+	}
+	if got := keyMaterial("ssh-ed25519 AAAABASE64"); got != "ssh-ed25519 AAAABASE64" {
+		t.Errorf("no-comment keyMaterial = %q", got)
+	}
+	// same key material, different comment -> equal
+	if keyMaterial("ssh-ed25519 KEY a") != keyMaterial("ssh-ed25519 KEY b") {
+		t.Error("same key with different comments should match")
+	}
+}
+
 func TestSortedKeys(t *testing.T) {
 	got := sortedKeys(map[string]string{"z": "1", "a": "2", "m": "3"})
 	if !sliceEq(got, []string{"a", "m", "z"}) {

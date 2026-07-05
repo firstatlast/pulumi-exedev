@@ -1,0 +1,28 @@
+{
+    "name": "@firstatlast/exedev",
+    "version": "0.1.0",
+    "keywords": [
+        "exe.dev",
+        "vm",
+        "compute",
+        "category/cloud"
+    ],
+    "homepage": "https://exe.dev",
+    "repository": "https://github.com/firstatlast/pulumi-exedev",
+    "license": "Apache-2.0",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@pulumi/pulumi": "^3.250.0"
+    },
+    "devDependencies": {
+        "@types/node": "^26",
+        "typescript": "^6.0.0"
+    },
+    "pulumi": {
+        "resource": true,
+        "name": "exedev",
+        "version": "0.1.0"
+    }
+}

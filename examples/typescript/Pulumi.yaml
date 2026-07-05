@@ -1,0 +1,3 @@
+name: exedev-example-ts
+runtime: nodejs
+description: Example exe.dev VM managed with Pulumi (TypeScript)

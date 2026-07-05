@@ -1,0 +1,28 @@
+# Build output
+/bin/
+pulumi-resource-exedev
+pulumi-gen-exedev
+
+# Go
+*.test
+*.out
+vendor/
+
+# Generated SDKs are checked in; only their build artifacts are ignored.
+node_modules/
+sdk/nodejs/bin/
+sdk/nodejs/*.tgz
+
+# Schema/codegen scratch
+/schema-embed.json
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Pulumi
+Pulumi.*.yaml
+!Pulumi.yaml
+.pulumi/

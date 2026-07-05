@@ -6,13 +6,21 @@ layout: installation
 
 ## Installation
 
-The exe.dev provider is distributed as the [`@firstatlast/exedev`](https://www.npmjs.com/package/@firstatlast/exedev)
-npm package and the `github.com/firstatlast/pulumi-exedev/sdk/go/exedev` Go module.
-Add it to a project with:
+Add the provider to a project with:
 
 ```bash
 pulumi package add exedev
 ```
+
+This installs the plugin (from the provider's GitHub Releases via the schema's
+`pluginDownloadURL`) and generates a local SDK in your project language — TypeScript,
+Python, Go, C#, Java or YAML. The exe.dev provider is a native provider, so the SDK for
+any supported language is produced from the package schema on demand; no per-language
+package needs to be published to a language registry.
+
+The Go SDK is also importable directly at
+`github.com/firstatlast/pulumi-exedev/sdk/go/exedev` and the TypeScript SDK is generated
+under the `@firstatlast/exedev` name.
 
 ## Configuration
 

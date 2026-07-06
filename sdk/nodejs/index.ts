@@ -25,6 +25,16 @@ export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
 utilities.lazyLoad(exports, ["Provider"], () => require("./provider"));
 
+export { ShareArgs } from "./share";
+export type Share = import("./share").Share;
+export const Share: typeof import("./share").Share = null as any;
+utilities.lazyLoad(exports, ["Share"], () => require("./share"));
+
+export { ShareLinkArgs } from "./shareLink";
+export type ShareLink = import("./shareLink").ShareLink;
+export const ShareLink: typeof import("./shareLink").ShareLink = null as any;
+utilities.lazyLoad(exports, ["ShareLink"], () => require("./shareLink"));
+
 export { SshKeyArgs } from "./sshKey";
 export type SshKey = import("./sshKey").SshKey;
 export const SshKey: typeof import("./sshKey").SshKey = null as any;
@@ -56,6 +66,10 @@ const _module = {
                 return new Domain(name, <any>undefined, { urn })
             case "exedev:index:Integration":
                 return new Integration(name, <any>undefined, { urn })
+            case "exedev:index:Share":
+                return new Share(name, <any>undefined, { urn })
+            case "exedev:index:ShareLink":
+                return new ShareLink(name, <any>undefined, { urn })
             case "exedev:index:SshKey":
                 return new SshKey(name, <any>undefined, { urn })
             case "exedev:index:TeamMember":

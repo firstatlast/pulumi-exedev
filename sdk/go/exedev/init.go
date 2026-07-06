@@ -25,6 +25,10 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 		r = &Domain{}
 	case "exedev:index:Integration":
 		r = &Integration{}
+	case "exedev:index:Share":
+		r = &Share{}
+	case "exedev:index:ShareLink":
+		r = &ShareLink{}
 	case "exedev:index:SshKey":
 		r = &SshKey{}
 	case "exedev:index:TeamMember":

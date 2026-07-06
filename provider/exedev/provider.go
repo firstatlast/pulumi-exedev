@@ -29,6 +29,8 @@ func NewProvider() (p.Provider, error) {
 			infer.Resource(&SshKey{}),
 			infer.Resource(&Integration{}),
 			infer.Resource(&TeamMember{}),
+			infer.Resource(&ShareLink{}),
+			infer.Resource(&Share{}),
 		).
 		WithFunctions(
 			infer.Function(&GetVm{}),

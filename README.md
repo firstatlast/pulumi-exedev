@@ -22,6 +22,9 @@ Pulumi resource.
   `remove`) with `attach`/`detach` reconciliation.
 - `exedev:index:TeamMember` — a team membership (`team add`/`role`/`remove`).
   Not yet verified against a live team.
+- `exedev:index:ShareLink` — a shareable HTTPS access link for a VM
+  (`share add-link`/`remove-link`).
+- `exedev:index:Share` — shares a VM with a user by email (`share add`/`remove`).
 
 ### Functions
 

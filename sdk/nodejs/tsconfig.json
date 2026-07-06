@@ -26,6 +26,8 @@
         "index.ts",
         "integration.ts",
         "provider.ts",
+        "share.ts",
+        "shareLink.ts",
         "sshKey.ts",
         "teamMember.ts",
         "utilities.ts",

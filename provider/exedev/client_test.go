@@ -119,6 +119,20 @@ func TestDomainID(t *testing.T) {
 	}
 }
 
+func TestParseTeamMembers(t *testing.T) {
+	ms, err := parseTeamMembers([]byte(`{"members":[{"email":"a@x.com","role":"admin"}]}`))
+	if err != nil || len(ms) != 1 || ms[0].Email != "a@x.com" || ms[0].Role != "admin" {
+		t.Errorf("members-wrap: %+v, %v", ms, err)
+	}
+	ms, err = parseTeamMembers([]byte(`[{"email":"b@x.com","role":"user"}]`))
+	if err != nil || len(ms) != 1 || ms[0].Email != "b@x.com" {
+		t.Errorf("bare-array: %+v, %v", ms, err)
+	}
+	if _, err := parseTeamMembers([]byte(`nope`)); err == nil {
+		t.Error("expected error for unparseable members")
+	}
+}
+
 func TestKeyMaterial(t *testing.T) {
 	// comment ignored; type+base64 preserved
 	if got := keyMaterial("ssh-ed25519 AAAABASE64 my-laptop"); got != "ssh-ed25519 AAAABASE64" {

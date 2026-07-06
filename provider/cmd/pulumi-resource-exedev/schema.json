@@ -287,6 +287,37 @@
         "publicKey"
       ]
     },
+    "exedev:index:TeamMember": {
+      "description": "Membership of your exe.dev team. Note: not yet verified against a live team.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email of the team member. Changing this replaces the membership."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role: user, admin, or billing_owner. Defaults to user.",
+          "default": "user"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "inputProperties": {
+        "email": {
+          "type": "string",
+          "description": "Email of the team member. Changing this replaces the membership."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role: user, admin, or billing_owner. Defaults to user.",
+          "default": "user"
+        }
+      },
+      "requiredInputs": [
+        "email"
+      ]
+    },
     "exedev:index:Vm": {
       "description": "A persistent Linux VM on exe.dev.",
       "properties": {

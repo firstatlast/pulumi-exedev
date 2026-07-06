@@ -664,6 +664,76 @@ func (c *Client) IntegrationDetach(ctx context.Context, name, spec string) error
 	return err
 }
 
+// TeamMemberInfo is the JSON shape from `team members`. Field names are parsed
+// leniently: the exact shape is unverified (requires a team account).
+type TeamMemberInfo struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+func (c *Client) TeamAdd(ctx context.Context, email, role string) error {
+	cmd := newCmd("team")
+	cmd.raw("add")
+	cmd.literal(email)
+	if role != "" {
+		cmd.literal(role)
+	}
+	cmd.raw("--json")
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return err
+	}
+	return bodyError(body)
+}
+
+func (c *Client) TeamRole(ctx context.Context, email, role string) error {
+	cmd := newCmd("team")
+	cmd.raw("role")
+	cmd.literal(email)
+	cmd.literal(role)
+	cmd.raw("--json")
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return err
+	}
+	return bodyError(body)
+}
+
+func (c *Client) TeamRemove(ctx context.Context, email string) error {
+	cmd := newCmd("team")
+	cmd.raw("remove")
+	cmd.literal(email)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	var apiErr *APIError
+	if err != nil && errors.As(err, &apiErr) && apiErr.Status == http.StatusUnprocessableEntity &&
+		strings.Contains(strings.ToLower(apiErr.Body), "not found") {
+		return nil
+	}
+	return err
+}
+
+func (c *Client) TeamMembers(ctx context.Context) ([]TeamMemberInfo, error) {
+	body, err := c.Exec(ctx, "team members --json")
+	if err != nil {
+		return nil, err
+	}
+	return parseTeamMembers(body)
+}
+
+func (c *Client) TeamMemberByEmail(ctx context.Context, email string) (*TeamMemberInfo, bool, error) {
+	members, err := c.TeamMembers(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	for i := range members {
+		if members[i].Email == email {
+			return &members[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
 // cmd accumulates shell-quoted command tokens.
 type cmd struct{ parts []string }
 
@@ -687,6 +757,22 @@ func shellQuote(s string) string {
 		return s
 	}
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+}
+
+// parseTeamMembers tolerates {"members":[..]} or a bare array. The shape is
+// unverified (requires a team account), so parsing is intentionally lenient.
+func parseTeamMembers(data []byte) ([]TeamMemberInfo, error) {
+	var wrap struct {
+		Members []TeamMemberInfo `json:"members"`
+	}
+	if err := json.Unmarshal(data, &wrap); err == nil && wrap.Members != nil {
+		return wrap.Members, nil
+	}
+	var arr []TeamMemberInfo
+	if err := json.Unmarshal(data, &arr); err == nil {
+		return arr, nil
+	}
+	return nil, fmt.Errorf("exe.dev: could not parse team members from response: %s", string(data))
 }
 
 // bodyError surfaces soft failures exe.dev returns as HTTP 200 with an

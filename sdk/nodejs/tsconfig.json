@@ -27,6 +27,7 @@
         "integration.ts",
         "provider.ts",
         "sshKey.ts",
+        "teamMember.ts",
         "utilities.ts",
         "vm.ts"
     ]

@@ -734,6 +734,130 @@ func (c *Client) TeamMemberByEmail(ctx context.Context, email string) (*TeamMemb
 	return nil, false, nil
 }
 
+// ShareState is the subset of `share show` used by the share resources.
+type ShareState struct {
+	Links []ShareLinkInfo `json:"links"`
+	Users []ShareUserInfo `json:"users"`
+}
+
+type ShareLinkInfo struct {
+	Token    string `json:"token"`
+	UseCount int    `json:"use_count"`
+}
+
+type ShareUserInfo struct {
+	Email  string `json:"email"`
+	Status string `json:"status"`
+}
+
+func (c *Client) ShareShow(ctx context.Context, vm string) (*ShareState, error) {
+	cmd := newCmd("share")
+	cmd.raw("show")
+	cmd.literal(vm)
+	cmd.raw("--json")
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return nil, err
+	}
+	var s ShareState
+	if err := json.Unmarshal(body, &s); err != nil {
+		return nil, fmt.Errorf("exe.dev: parsing share show: %w: %s", err, string(body))
+	}
+	return &s, nil
+}
+
+// ShareAddLink creates a share link and returns its token and URL.
+func (c *Client) ShareAddLink(ctx context.Context, vm string) (token, url string, err error) {
+	cmd := newCmd("share")
+	cmd.raw("add-link")
+	cmd.literal(vm)
+	cmd.raw("--json")
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return "", "", err
+	}
+	var r struct {
+		Token string `json:"token"`
+		URL   string `json:"url"`
+	}
+	if err := json.Unmarshal(body, &r); err != nil {
+		return "", "", fmt.Errorf("exe.dev: parsing add-link: %w: %s", err, string(body))
+	}
+	return r.Token, r.URL, nil
+}
+
+func (c *Client) ShareRemoveLink(ctx context.Context, vm, token string) error {
+	cmd := newCmd("share")
+	cmd.raw("remove-link")
+	cmd.literal(vm)
+	cmd.literal(token)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	var apiErr *APIError
+	if err != nil && errors.As(err, &apiErr) && apiErr.Status == http.StatusUnprocessableEntity &&
+		strings.Contains(strings.ToLower(apiErr.Body), "not found") {
+		return nil
+	}
+	return err
+}
+
+func (c *Client) ShareLinkByToken(ctx context.Context, vm, token string) (*ShareLinkInfo, bool, error) {
+	s, err := c.ShareShow(ctx, vm)
+	if err != nil {
+		return nil, false, err
+	}
+	for i := range s.Links {
+		if s.Links[i].Token == token {
+			return &s.Links[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
+func (c *Client) ShareAddUser(ctx context.Context, vm, email, message string) error {
+	cmd := newCmd("share")
+	cmd.raw("add")
+	cmd.literal(vm)
+	cmd.literal(email)
+	if message != "" {
+		cmd.flag("message", message)
+	}
+	cmd.raw("--json")
+	body, err := c.Exec(ctx, cmd.String())
+	if err != nil {
+		return err
+	}
+	return bodyError(body)
+}
+
+func (c *Client) ShareRemoveUser(ctx context.Context, vm, email string) error {
+	cmd := newCmd("share")
+	cmd.raw("remove")
+	cmd.literal(vm)
+	cmd.literal(email)
+	cmd.raw("--json")
+	_, err := c.Exec(ctx, cmd.String())
+	var apiErr *APIError
+	if err != nil && errors.As(err, &apiErr) && apiErr.Status == http.StatusUnprocessableEntity &&
+		strings.Contains(strings.ToLower(apiErr.Body), "not found") {
+		return nil
+	}
+	return err
+}
+
+func (c *Client) ShareUserByEmail(ctx context.Context, vm, email string) (*ShareUserInfo, bool, error) {
+	s, err := c.ShareShow(ctx, vm)
+	if err != nil {
+		return nil, false, err
+	}
+	for i := range s.Users {
+		if s.Users[i].Email == email {
+			return &s.Users[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
 // cmd accumulates shell-quoted command tokens.
 type cmd struct{ parts []string }
 

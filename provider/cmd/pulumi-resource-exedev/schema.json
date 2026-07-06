@@ -250,6 +250,78 @@
         "name"
       ]
     },
+    "exedev:index:Share": {
+      "description": "Shares HTTPS access to a VM with a user by email.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email of the user to share with. Changing this replaces the share."
+        },
+        "message": {
+          "type": "string",
+          "description": "Optional message included in the invitation. Applied only at create time."
+        },
+        "status": {
+          "type": "string"
+        },
+        "vm": {
+          "type": "string",
+          "description": "Name of the VM to share. Changing this replaces the share."
+        }
+      },
+      "required": [
+        "vm",
+        "email",
+        "status"
+      ],
+      "inputProperties": {
+        "email": {
+          "type": "string",
+          "description": "Email of the user to share with. Changing this replaces the share."
+        },
+        "message": {
+          "type": "string",
+          "description": "Optional message included in the invitation. Applied only at create time."
+        },
+        "vm": {
+          "type": "string",
+          "description": "Name of the VM to share. Changing this replaces the share."
+        }
+      },
+      "requiredInputs": [
+        "vm",
+        "email"
+      ]
+    },
+    "exedev:index:ShareLink": {
+      "description": "A shareable HTTPS access link for a VM.",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "vm": {
+          "type": "string",
+          "description": "Name of the VM to create a share link for. Changing this replaces the link."
+        }
+      },
+      "required": [
+        "vm",
+        "token",
+        "url"
+      ],
+      "inputProperties": {
+        "vm": {
+          "type": "string",
+          "description": "Name of the VM to create a share link for. Changing this replaces the link."
+        }
+      },
+      "requiredInputs": [
+        "vm"
+      ]
+    },
     "exedev:index:SshKey": {
       "description": "An SSH public key registered on your exe.dev account.",
       "properties": {

@@ -27,6 +27,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 		r = &Integration{}
 	case "exedev:index:SshKey":
 		r = &SshKey{}
+	case "exedev:index:TeamMember":
+		r = &TeamMember{}
 	case "exedev:index:Vm":
 		r = &Vm{}
 	default:

@@ -30,6 +30,11 @@ export type SshKey = import("./sshKey").SshKey;
 export const SshKey: typeof import("./sshKey").SshKey = null as any;
 utilities.lazyLoad(exports, ["SshKey"], () => require("./sshKey"));
 
+export { TeamMemberArgs } from "./teamMember";
+export type TeamMember = import("./teamMember").TeamMember;
+export const TeamMember: typeof import("./teamMember").TeamMember = null as any;
+utilities.lazyLoad(exports, ["TeamMember"], () => require("./teamMember"));
+
 export { VmArgs } from "./vm";
 export type Vm = import("./vm").Vm;
 export const Vm: typeof import("./vm").Vm = null as any;
@@ -53,6 +58,8 @@ const _module = {
                 return new Integration(name, <any>undefined, { urn })
             case "exedev:index:SshKey":
                 return new SshKey(name, <any>undefined, { urn })
+            case "exedev:index:TeamMember":
+                return new TeamMember(name, <any>undefined, { urn })
             case "exedev:index:Vm":
                 return new Vm(name, <any>undefined, { urn })
             default:

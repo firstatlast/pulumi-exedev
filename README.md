@@ -20,6 +20,8 @@ Pulumi resource.
 - `exedev:index:SshKey` — an account SSH key (`ssh-key add`/`remove`/`list`).
 - `exedev:index:Integration` — an http-proxy integration (`integrations add`/`edit`/
   `remove`) with `attach`/`detach` reconciliation.
+- `exedev:index:TeamMember` — a team membership (`team add`/`role`/`remove`).
+  Not yet verified against a live team.
 
 ### Functions
 

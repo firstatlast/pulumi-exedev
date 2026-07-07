@@ -11,7 +11,7 @@ import (
 
 // Version is the provider version. It is overridden at build time via
 // -ldflags "-X main.Version=x.y.z".
-var Version = "0.2.0"
+var Version = "0.3.0"
 
 func main() {
 	provider, err := exedev.NewProvider()

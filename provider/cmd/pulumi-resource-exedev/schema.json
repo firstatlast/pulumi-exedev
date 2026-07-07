@@ -1,7 +1,7 @@
 {
   "name": "exedev",
   "displayName": "exe.dev",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A Pulumi provider for managing exe.dev VMs.",
   "keywords": [
     "exe.dev",

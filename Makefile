@@ -1,5 +1,5 @@
 PROVIDER      := pulumi-resource-exedev
-VERSION       ?= 0.2.0
+VERSION       ?= 0.3.0
 PKG           := exedev
 PROVIDER_PATH := provider
 BIN           := bin/$(PROVIDER)
